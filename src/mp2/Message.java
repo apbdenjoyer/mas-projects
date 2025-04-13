@@ -11,25 +11,24 @@ public class Message extends ObjectPlus implements Serializable {
     private final LocalDateTime timestamp;
 
     //    whole
-    private Channel channel;
+    private Server server;
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("dd MMMM yyyy 'at' HH:mm");
 
-    private Message(Channel channel, User author, String contents) {
+    private Message(Server server, User author, String contents) {
         super();
 
-        this.channel = channel;
+        this.server = server;
         this.author = author;
         this.contents = contents;
         this.timestamp = LocalDateTime.now();
     }
 
-    public static Message createMessage(Channel channel, User author,
-                                        String contents) throws Exception {
+    public static Message createMessage(Server server, User author, String contents) throws Exception {
 
-        if (channel == null) {
-            throw new IllegalArgumentException("Channel is null.");
+        if (server == null) {
+            throw new IllegalArgumentException("Server is null.");
         }
 
         if (author == null) {
@@ -40,9 +39,9 @@ public class Message extends ObjectPlus implements Serializable {
             throw new IllegalArgumentException("Contents is null or empty.");
         }
 
-        Message message = new Message(channel, author, contents);
+        Message message = new Message(server, author, contents);
 
-        channel.addPart("contains", "posted in", message);
+        server.addPart("contains", "posted in", message);
 
         return message;
     }

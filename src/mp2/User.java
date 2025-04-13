@@ -10,24 +10,17 @@ public class User extends ObjectPlus implements Serializable {
     private static final int MIN_LOGIN_LEN = 3;
     private static final int MAX_LOGIN_LEN = 20;
 
-    List<UserOnServer> userOnServers;
-
-    public User(String login) throws ServerAppException, ClassNotFoundException {
+    public User(String login) {
         super();
+
+        this.login = login;
 
         if (!isLoginValid(login)) {
             removeFromExtent(this);
-            throw new ServerAppException("Login is invalid (alphanumerics, _," +
-                    " between 3 and 20 characters.)");
         }
-
         if (!isloginAvailable(login)) {
             removeFromExtent(this);
-            throw new ServerAppException(String.format("Login %s is already " +
-                    "in use.", login));
         }
-
-        this.login = login;
     }
 
     private boolean isLoginValid(String login) {
@@ -42,13 +35,16 @@ public class User extends ObjectPlus implements Serializable {
         return login.matches("\\w+");
     }
 
-    private boolean isloginAvailable(String login) throws ClassNotFoundException {
-        for (User user : getExtent(User.class)) {
-            if (user != null) {
-                if (user.getLogin().equals(login) && !user.equals(this)) {
+    private boolean isloginAvailable(String login) {
+        try {
+            for (User user : getExtent(User.class)) {
+                if (user != null && user.getLogin().equals(login) && !user.equals(this)) {
                     return false;
                 }
             }
+        } catch (
+                ClassNotFoundException ignored) {
+//            no need to handle, since it'd mean no users
         }
         return true;
     }
@@ -63,7 +59,9 @@ public class User extends ObjectPlus implements Serializable {
         }
     }
 
-    public List<UserOnServer> getUserOnServers() {
-        return Collections.unmodifiableList(userOnServers);
+
+    @Override
+    public String toString() {
+        return String.format("(User: %s)", login);
     }
 }

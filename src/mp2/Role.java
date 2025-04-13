@@ -8,6 +8,10 @@ public class Role extends ObjectPlus implements Serializable {
 
     public Role(String name, User user) {
         super();
+
+        this.name = name;
+        this.user = user;
+
         if (name == null || name.isEmpty()) {
             removeFromExtent(this);
         }
@@ -16,8 +20,6 @@ public class Role extends ObjectPlus implements Serializable {
             removeFromExtent(this);
         }
 
-        this.name = name;
-        this.user = user;
     }
 
     public String getName() {
@@ -28,4 +30,8 @@ public class Role extends ObjectPlus implements Serializable {
         return user;
     }
 
+    @Override
+    public String toString() {
+        return String.format("(Role: %s, User: %s)", name, user.getLogin());
+    }
 }

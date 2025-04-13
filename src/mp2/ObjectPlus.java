@@ -95,7 +95,7 @@ public abstract class ObjectPlus implements Serializable {
         }
     }
 
-
+    //    for qualifier associations
     private void addLink(String role, String reverseRole,
                          ObjectPlus target, Object qualifier,
                          int counter) {
@@ -125,10 +125,47 @@ public abstract class ObjectPlus implements Serializable {
                         Object qualifier) {
         addLink(role, reverseRole, target, qualifier, 2);
     }
+    //    for regular associations
 
     public void addLink(String role, String reverseRole, ObjectPlus target) {
-        addLink(role, reverseRole, target, target, 0);
+        addLink(role, reverseRole, target, target);
     }
+
+    private void removeLink(String role, String reverseRole,
+                            ObjectPlus target, Object qualifier, int counter) {
+
+        Map<Object, ObjectPlus> objectLinks;
+
+        if (counter < 1) {
+            return;
+        }
+
+        if (links.containsKey(role)) {
+            objectLinks = links.get(role);
+        } else {
+            return;
+        }
+
+        if (objectLinks.containsKey(qualifier)) {
+            objectLinks.remove(qualifier);
+
+            if (objectLinks.isEmpty()) {
+                links.remove(role);
+            }
+
+        }
+
+        target.removeLink(reverseRole, role, this, this, counter - 1);
+    }
+
+    public void removeLink(String role, String reverseRole, ObjectPlus target, Object qualifier) {
+        removeLink(role, reverseRole, target, qualifier, 0);
+    }
+
+    public void removeLink(String role, String reverseRole, ObjectPlus target) {
+        removeLink(role, reverseRole, target, target, 0);
+    }
+
 
     public void addPart(String role, String reverseRole, ObjectPlus part) throws Exception {
         if (allParts.contains(part)) {
@@ -139,6 +176,23 @@ public abstract class ObjectPlus implements Serializable {
 
         allParts.add(part);
     }
+
+    public void removePart(String role, String reverseRole, ObjectPlus part) throws Exception {
+        if (!allParts.contains(part)) {
+            throw new Exception("Part is not currently connected.");
+        }
+
+        removeLink(role, reverseRole, part);
+
+        // Remove from the allParts tracking
+        allParts.remove(part);
+
+        // Optional: Also remove from extent, if desired
+        if (extents.containsKey(part.getClass())) {
+            extents.get(part.getClass()).remove(part);
+        }
+    }
+
 
     public ObjectPlus[] getLinks(String role) throws Exception {
         Map<Object, ObjectPlus> objectLinks;
